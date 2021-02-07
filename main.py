@@ -1,16 +1,43 @@
-# This is a sample Python script.
+import requests
+import json
+import time
+import config
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+BOT_URL = f"https://api.telegram.org/bot{config.telegram_pc_key}/"
+OFFSET = 0
+
+def get_updates(offset):
+    tg_request = requests.get(BOT_URL + f"getUpdates?offset={offset}")
+    try:
+        tg_req_data = json.loads(tg_request.text)
+        return tg_req_data
+    except Exception as e:
+        print(e)
+
+def send_message(chat_id, text):
+    data = {
+        "chat_id": chat_id,
+        "text": text
+    }
+    try:
+        requests.post(BOT_URL + "sendMessage", data=data)
+    except Exception as e:
+        print(e)
+
+while True:
+    data = get_updates(OFFSET)
+    print(data)
+    try:
+        result = data["result"]
+        for res in result:
+            OFFSET = res["update_id"] + 1
+            if res["message"]["text"] == "/start":
+                send_message(chat_id=res["message"]["chat"]["id"], text="Hello")
+    except:
+        continue
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    pass
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
